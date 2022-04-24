@@ -63,3 +63,4 @@ This 'fix' has to be repeated when ksmserver is updated.
 ## Knonw issues
 - It is theoretically possible that in a multi monitor setup the screensavers become asynchronous, should be fixed the next time you run it.
 - Xscreensaver seems to have a problem terminating mediaplayers other than mplayer. What leads to the situation that the playback processes remain active after closing the screensaver.
+- When downloading, each video is first written fully to RAM before being written to disk. Note this in low RAM scenarios. 
