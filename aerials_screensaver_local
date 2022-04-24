@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+AERIAL="$HOME/Videos/Screensaver-SDR"
+PLAYLIST=/tmp/aerial.lst
+
+if test -f "$PLAYLIST"; then
+	#file exists
+	if [ "$(date +%s -r $PLAYLIST)" -lt "$(date +%s --date='10 min ago')" ]; then
+		#update rotation
+		find "$AERIAL"/*.mov | sort -R > $PLAYLIST
+	fi
+else
+	#file dont exists
+	find "$AERIAL"/*.mov | sort -R > $PLAYLIST
+fi
+
+# this part taken from Kevin Cox
+# https://github.com/kevincox/xscreensaver-videos
+
+IFS=$'\n'
+trap : SIGTERM SIGINT SIGHUP
+while (true) #!(keystate lshift)
+do
+    mplayer -nosound -really-quiet -nolirc -nostop-xscreensaver -wid "$XSCREENSAVER_WINDOW" -fs -playlist $PLAYLIST &
+  pid=$!
+  wait $pid
+  [ $? -gt 128 ] && { kill $pid ; exit 128; } ;
+done

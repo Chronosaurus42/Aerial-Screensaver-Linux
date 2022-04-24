@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+AERIAL="$HOME/Videos/Screensaver-SDR"
+PLAYLIST=/tmp/aerial_streams.tmp
+STREAMS=$AERIAL/Aerials_stream.url
+
+
+if ! test -f "$PLAYLIST"; then
+  cat "$STREAMS" | sort -R | head -n1 > $PLAYLIST
+fi
+
+function video() {
+  #select every minute a new fixed url, to keep multiscreen in sync
+  if [ "$(date +%s -r $PLAYLIST)" -lt "$(date +%s --date='1 min ago')" ]; then
+    cat "$STREAMS" | sort -R | head -n1 > $PLAYLIST
+  fi
+  CURRENT_VIDEO=$(cat $PLAYLIST)
+}
+
+# this part taken from Kevin Cox
+# https://github.com/kevincox/xscreensaver-videos
+
+IFS=$'\n'
+trap : SIGTERM SIGINT SIGHUP
+while (true) #!(keystate lshift)
+do
+  video
+  mplayer -nosound -really-quiet -nolirc -nostop-xscreensaver -wid "$XSCREENSAVER_WINDOW" -fs "$CURRENT_VIDEO" &
+  pid=$!
+  wait $pid
+  [ $? -gt 128 ] && { kill $pid ; exit 128; } ;
+done
